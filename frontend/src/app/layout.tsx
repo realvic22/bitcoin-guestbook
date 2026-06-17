@@ -18,6 +18,10 @@ export const metadata: Metadata = {
     description: "Immutable messages anchored to Bitcoin forever.",
     type: "website",
   },
+  other: {
+    "talentapp:project_verification":
+      "78f7ab1938f9785c2ea3e919e4730e936dcfa0352176b7f2c208d4f65fa06eec8bfd82997ceacb27379093d670ce74d94e322a53cd3cc91bbcde8e83e8160d28",
+  },
 };
 
 export default function RootLayout({
