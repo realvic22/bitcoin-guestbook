@@ -1,0 +1,279 @@
+@import "tailwindcss";
+
+:root {
+  /* ── Memory Ledger Palette ── */
+  --neu-bg: #f4eadf;
+  --neu-bg-light: #fff8ec;
+  --neu-shadow-light: #fffaf0;
+  --neu-shadow-dark: #cbbbab;
+
+  /* ── Shadows ── */
+  --neu-raised: 8px 8px 16px var(--neu-shadow-dark), -8px -8px 16px var(--neu-shadow-light);
+  --neu-raised-sm: 4px 4px 10px var(--neu-shadow-dark), -4px -4px 10px var(--neu-shadow-light);
+  --neu-raised-lg: 12px 12px 24px var(--neu-shadow-dark), -12px -12px 24px var(--neu-shadow-light);
+  --neu-inset: inset 6px 6px 12px var(--neu-shadow-dark), inset -6px -6px 12px var(--neu-shadow-light);
+  --neu-inset-sm: inset 3px 3px 7px var(--neu-shadow-dark), inset -3px -3px 7px var(--neu-shadow-light);
+  --neu-pressed: inset 4px 4px 8px var(--neu-shadow-dark), inset -2px -2px 6px var(--neu-shadow-light);
+
+  /* ── Accent ── */
+  --neu-accent: #6f4fd8;
+  --neu-accent-light: #8a73ee;
+  --neu-accent-shadow-dark: #4c35a7;
+  --neu-accent-shadow-light: #aa93ff;
+  --neu-accent-raised: 6px 6px 12px var(--neu-accent-shadow-dark), -4px -4px 10px var(--neu-accent-shadow-light);
+  --neu-accent-pressed: inset 4px 4px 8px var(--neu-accent-shadow-dark), inset -2px -2px 6px var(--neu-accent-shadow-light);
+
+  /* ── Text ── */
+  --text-primary: #2e3142;
+  --text-secondary: #6d6174;
+  --text-muted: #9b8d92;
+  --text-accent: #6f4fd8;
+  --ink: #201923;
+  --gold: #c98e2f;
+  --rose: #bf476f;
+  --teal: #176f75;
+  --ember: #d65a31;
+
+  /* ── Borders ── */
+  --neu-border: rgba(0, 0, 0, 0.04);
+
+  /* ── Radii ── */
+  --radius-card: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 50px;
+  --radius-input: 12px;
+}
+
+/* ── Base Resets ── */
+html {
+  scroll-behavior: smooth;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(191, 71, 111, 0.12), transparent 26rem),
+    radial-gradient(circle at 84% 18%, rgba(23, 111, 117, 0.12), transparent 28rem),
+    linear-gradient(135deg, #fff8ec 0%, #f4eadf 42%, #e9edf2 100%);
+}
+
+body {
+  background:
+    linear-gradient(rgba(46, 49, 66, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46, 49, 66, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 12% 8%, rgba(191, 71, 111, 0.12), transparent 26rem),
+    radial-gradient(circle at 84% 18%, rgba(23, 111, 117, 0.12), transparent 28rem),
+    linear-gradient(135deg, #fff8ec 0%, #f4eadf 42%, #e9edf2 100%);
+  background-size: 28px 28px, 28px 28px, auto, auto, auto;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Neumorphic Utility Classes ── */
+.neu-bg {
+  background: var(--neu-bg);
+}
+
+.neu-raised {
+  box-shadow: var(--neu-raised);
+}
+
+.neu-raised-sm {
+  box-shadow: var(--neu-raised-sm);
+}
+
+.neu-raised-lg {
+  box-shadow: var(--neu-raised-lg);
+}
+
+.neu-inset {
+  box-shadow: var(--neu-inset);
+}
+
+.neu-inset-sm {
+  box-shadow: var(--neu-inset-sm);
+}
+
+.neu-pressed {
+  box-shadow: var(--neu-pressed);
+}
+
+.neu-card {
+  background: rgba(255, 248, 236, 0.76);
+  box-shadow: var(--neu-raised);
+  border-radius: var(--radius-card);
+  border: 1px solid rgba(72, 53, 39, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.neu-card-inset {
+  background: rgba(255, 248, 236, 0.5);
+  box-shadow: var(--neu-inset);
+  border-radius: var(--radius-card);
+}
+
+.neu-btn {
+  background: rgba(255, 248, 236, 0.78);
+  box-shadow: var(--neu-raised-sm);
+  border-radius: var(--radius-pill);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.neu-btn:hover {
+  box-shadow: var(--neu-raised);
+}
+
+.neu-btn:active {
+  box-shadow: var(--neu-pressed);
+}
+
+.neu-btn-accent {
+  background: linear-gradient(135deg, var(--neu-accent), #2b7a78);
+  color: #ffffff;
+  box-shadow: var(--neu-accent-raised);
+  border-radius: var(--radius-pill);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.neu-btn-accent:hover {
+  background: var(--neu-accent-light);
+}
+
+.neu-btn-accent:active {
+  box-shadow: var(--neu-accent-pressed);
+}
+
+.neu-input {
+  background: rgba(255, 248, 236, 0.68);
+  box-shadow: var(--neu-inset-sm);
+  border-radius: var(--radius-input);
+  border: none;
+  outline: none;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  transition: box-shadow 0.2s ease;
+}
+
+.neu-input:focus {
+  box-shadow: var(--neu-inset);
+}
+
+.neu-badge {
+  background: rgba(255, 248, 236, 0.72);
+  box-shadow: var(--neu-inset-sm);
+  border-radius: var(--radius-pill);
+  padding: 0.25rem 0.75rem;
+}
+
+.neu-icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 248, 236, 0.8);
+  box-shadow: var(--neu-raised-sm);
+  border-radius: 50%;
+  transition: box-shadow 0.2s ease;
+}
+
+.neu-icon-circle-inset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 248, 236, 0.5);
+  box-shadow: var(--neu-inset-sm);
+  border-radius: 50%;
+}
+
+/* ── Navbar scroll transition ── */
+.neu-navbar-scrolled {
+  box-shadow: var(--neu-raised-lg);
+}
+
+/* ── Animations ── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-fade-in-up-delay-1 {
+  animation: fadeInUp 0.6s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-up-delay-2 {
+  animation: fadeInUp 0.6s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+@keyframes ledgerDrift {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(var(--rotate, 0deg));
+  }
+  50% {
+    transform: translate3d(0, -10px, 0) rotate(calc(var(--rotate, 0deg) + 1deg));
+  }
+}
+
+@keyframes pulseSeal {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(201, 142, 47, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(201, 142, 47, 0);
+  }
+}
+
+.memory-card {
+  animation: ledgerDrift 8s ease-in-out infinite;
+}
+
+.wax-seal {
+  animation: pulseSeal 2.8s ease-in-out infinite;
+}
+
+.room-strip {
+  scrollbar-width: none;
+}
+
+.room-strip::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── FAQ accordion transition ── */
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+}
+
+.faq-answer.open {
+  max-height: 500px;
+  padding-top: 1rem;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--neu-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--neu-shadow-dark);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
