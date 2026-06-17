@@ -1,0 +1,309 @@
+;; Bitcoin Guestbook v2 - Named Walls, Replies, Time Capsules, Reactions, Usernames, Search
+
+;; -- Constants --------------------------------------------------------
+
+(define-constant CONTRACT_OWNER tx-sender)
+(define-constant ENTRY_FEE u10000)
+(define-constant REACTION_FEE u1000)
+(define-constant PAGE_FEE u50000)
+(define-constant USERNAME_FEE u50000)
+(define-constant MAX_MESSAGE_LEN u200)
+(define-constant MAX_USERNAME_LEN u30)
+(define-constant MAX_PAGE_NAME_LEN u30)
+
+;; -- Error Codes ------------------------------------------------------
+
+(define-constant ERR_TOO_LONG (err u100))
+(define-constant ERR_NOT_FOUND (err u101))
+(define-constant ERR_NOT_OWNER (err u102))
+(define-constant ERR_PAGE_NOT_FOUND (err u103))
+(define-constant ERR_INVALID_USERNAME (err u105))
+(define-constant ERR_USERNAME_TAKEN (err u106))
+(define-constant ERR_INVALID_EMOJI (err u107))
+(define-constant ERR_ALREADY_HAS_USERNAME (err u110))
+(define-constant ERR_ALREADY_SEEDED (err u112))
+
+;; -- Emoji IDs --------------------------------------------------------
+
+(define-constant EMOJI_HEART  u1)
+(define-constant EMOJI_PRAY   u2)
+(define-constant EMOJI_STRONG u3)
+(define-constant EMOJI_FIRE   u4)
+(define-constant EMOJI_CANDLE u5)
+(define-constant EMOJI_STAR   u6)
+
+;; -- Maps -------------------------------------------------------------
+
+(define-map entries uint {
+  author: principal, message: (string-ascii 200), block: uint,
+  page-id: (optional uint), parent-id: (optional uint), reveal-block: (optional uint)
+})
+
+(define-map pages uint {
+  creator: principal, name: (string-ascii 30), description: (string-ascii 80), color: (string-ascii 7), entry-count: uint
+})
+
+(define-map user-reactions { entry-id: uint, reactor: principal } uint)
+(define-map reaction-counts { entry-id: uint, emoji-id: uint } uint)
+(define-map usernames { username: (string-ascii 30) } principal)
+(define-map username-owners principal (string-ascii 30))
+(define-map user-entry-index { user: principal, pos: uint } uint)
+(define-map user-entry-counts principal uint)
+
+;; -- Data Vars --------------------------------------------------------
+
+(define-data-var next-entry-id uint u0)
+(define-data-var next-page-id uint u0)
+(define-data-var fees-collected uint u0)
+(define-data-var seeded bool false)
+
+;; -- Public: Seed Default Pages ---------------------------------------
+
+(define-public (seed-pages)
+  (let
+    ((own (is-eq tx-sender CONTRACT_OWNER))
+     (already (var-get seeded))
+     (store
+      (begin
+        (var-set seeded true)
+        (map-set pages u1 { creator: CONTRACT_OWNER, name: "Dream Wall", description: "What you hope for.", color: "#7c6fcd", entry-count: u0 })
+        (map-set pages u2 { creator: CONTRACT_OWNER, name: "Thank You Wall", description: "Things you owe that money cannot repay.", color: "#e07b5a", entry-count: u0 })
+        (map-set pages u3 { creator: CONTRACT_OWNER, name: "Memory Wall", description: "Moments you refuse to forget.", color: "#5a8ec9", entry-count: u0 })
+        (map-set pages u4 { creator: CONTRACT_OWNER, name: "Love Notes", description: "For the people you love.", color: "#d46a8c", entry-count: u0 })
+        (map-set pages u5 { creator: CONTRACT_OWNER, name: "Forgiveness Wall", description: "Let it go. Leave it here.", color: "#6bbf8a", entry-count: u0 })
+        (map-set pages u6 { creator: CONTRACT_OWNER, name: "Legacy Wall", description: "What you want to leave behind.", color: "#c9a85a", entry-count: u0 })
+        (map-set pages u7 { creator: CONTRACT_OWNER, name: "Predictions", description: "What you think will happen.", color: "#8ec9c9", entry-count: u0 })
+        (map-set pages u8 { creator: CONTRACT_OWNER, name: "General", description: "Everything else.", color: "#9e9e9e", entry-count: u0 })
+        (var-set next-page-id u8)
+        true
+      )))
+    (asserts! own ERR_NOT_OWNER)
+    (asserts! (not already) ERR_ALREADY_SEEDED)
+    (print { notification: "pages-seeded", count: u8 })
+    (ok true)
+  )
+)
+
+;; -- Public: Write an Entry -------------------------------------------
+
+(define-public (write
+    (message (string-ascii 200))
+    (page-id (optional uint))
+    (parent-id (optional uint))
+    (reveal-block (optional uint))
+  )
+  (let
+    ((msg-len (<= (len message) MAX_MESSAGE_LEN))
+     (id (+ (var-get next-entry-id) u1))
+     (stored
+      (begin
+        (var-set next-entry-id id)
+        (map-set entries id {
+          author: tx-sender, message: message, block: block-height,
+          page-id: page-id, parent-id: parent-id, reveal-block: reveal-block
+        })
+        (let
+          ((new-count (+ (default-to u0 (map-get? user-entry-counts tx-sender)) u1)))
+          (map-set user-entry-counts tx-sender new-count)
+          (map-set user-entry-index { user: tx-sender, pos: new-count } id)
+        )
+        (var-set fees-collected (+ (var-get fees-collected) ENTRY_FEE))
+        true
+      )))
+    (asserts! msg-len ERR_TOO_LONG)
+    (try! (stx-transfer? ENTRY_FEE tx-sender (as-contract tx-sender)))
+    (print { notification: "new-entry", entry-id: id, author: tx-sender })
+    (ok id)
+  )
+)
+
+;; -- Public: React to an Entry ----------------------------------------
+
+(define-public (react (entry-id uint) (emoji (optional uint)))
+  (let
+    ((caller tx-sender)
+     (current (default-to u0 (map-get? user-reactions { entry-id: entry-id, reactor: caller })))
+     (did-decrement
+      (if (> current u0)
+        (let
+          ((old-count (default-to u0 (map-get? reaction-counts { entry-id: entry-id, emoji-id: current }))))
+          (if (> old-count u0)
+            (map-set reaction-counts { entry-id: entry-id, emoji-id: current } (- old-count u1))
+            true
+          )
+        )
+        true
+      )))
+    (match emoji
+      new-emoji
+        (begin
+          (asserts! (and (>= new-emoji u1) (<= new-emoji u6)) ERR_INVALID_EMOJI)
+          (try! (stx-transfer? REACTION_FEE caller (as-contract tx-sender)))
+          (let
+            ((stored
+              (begin
+                (let
+                  ((new-count (+ u1 (default-to u0 (map-get? reaction-counts { entry-id: entry-id, emoji-id: new-emoji })))))
+                  (map-set reaction-counts { entry-id: entry-id, emoji-id: new-emoji } new-count)
+                )
+                (map-set user-reactions { entry-id: entry-id, reactor: caller } new-emoji)
+                (var-set fees-collected (+ (var-get fees-collected) REACTION_FEE))
+                true
+              )))
+            (print { notification: "reaction", entry-id: entry-id, reactor: caller, emoji: new-emoji })
+            (ok new-emoji)
+          )
+        )
+      (begin
+        (map-delete user-reactions { entry-id: entry-id, reactor: caller })
+        (print { notification: "reaction-removed", entry-id: entry-id, reactor: caller })
+        (ok u0)
+      )
+    )
+  )
+)
+
+;; -- Public: Create a Page --------------------------------------------
+
+(define-public (create-page
+    (name (string-ascii 30))
+    (description (string-ascii 80))
+    (color (string-ascii 7))
+  )
+  (let
+    ((name-len (<= (len name) MAX_PAGE_NAME_LEN))
+     (non-empty (> (len name) u1))
+     (page-id (+ (var-get next-page-id) u1))
+     (stored
+      (begin
+        (var-set next-page-id page-id)
+        (map-set pages page-id {
+          creator: tx-sender, name: name, description: description, color: color, entry-count: u0
+        })
+        (var-set fees-collected (+ (var-get fees-collected) PAGE_FEE))
+        true
+      )))
+    (asserts! name-len ERR_TOO_LONG)
+    (asserts! non-empty ERR_TOO_LONG)
+    (try! (stx-transfer? PAGE_FEE tx-sender (as-contract tx-sender)))
+    (print { notification: "page-created", page-id: page-id, name: name })
+    (ok page-id)
+  )
+)
+
+;; -- Public: Register Username ----------------------------------------
+
+(define-public (register-username (username (string-ascii 30)))
+  (let
+    ((name-len (<= (len username) MAX_USERNAME_LEN))
+     (min-len (>= (len username) u3))
+     (has-name (is-some (map-get? username-owners tx-sender)))
+     (taken (is-some (map-get? usernames { username: username })))
+     (stored
+      (begin
+        (map-set usernames { username: username } tx-sender)
+        (map-set username-owners tx-sender username)
+        (var-set fees-collected (+ (var-get fees-collected) USERNAME_FEE))
+        true
+      )))
+    (asserts! name-len ERR_TOO_LONG)
+    (asserts! min-len ERR_INVALID_USERNAME)
+    (asserts! (not has-name) ERR_ALREADY_HAS_USERNAME)
+    (asserts! (not taken) ERR_USERNAME_TAKEN)
+    (try! (stx-transfer? USERNAME_FEE tx-sender (as-contract tx-sender)))
+    (print { notification: "username-registered", username: username, owner: tx-sender })
+    (ok true)
+  )
+)
+
+;; -- Read-Only: Entries -----------------------------------------------
+
+(define-read-only (get-entry (entry-id uint))
+  (match (map-get? entries entry-id)
+    entry (ok entry)
+    ERR_NOT_FOUND
+  )
+)
+
+(define-read-only (get-entry-count)
+  (ok (var-get next-entry-id))
+)
+
+;; -- Read-Only: Pages -------------------------------------------------
+
+(define-read-only (get-page (page-id uint))
+  (match (map-get? pages page-id)
+    page (ok page)
+    ERR_PAGE_NOT_FOUND
+  )
+)
+
+(define-read-only (get-page-count)
+  (ok (var-get next-page-id))
+)
+
+;; -- Read-Only: Reactions ---------------------------------------------
+
+(define-read-only (get-reactions (entry-id uint))
+  (ok {
+    heart:  (default-to u0 (map-get? reaction-counts { entry-id: entry-id, emoji-id: EMOJI_HEART })),
+    pray:   (default-to u0 (map-get? reaction-counts { entry-id: entry-id, emoji-id: EMOJI_PRAY })),
+    strong: (default-to u0 (map-get? reaction-counts { entry-id: entry-id, emoji-id: EMOJI_STRONG })),
+    fire:   (default-to u0 (map-get? reaction-counts { entry-id: entry-id, emoji-id: EMOJI_FIRE })),
+    candle: (default-to u0 (map-get? reaction-counts { entry-id: entry-id, emoji-id: EMOJI_CANDLE })),
+    star:   (default-to u0 (map-get? reaction-counts { entry-id: entry-id, emoji-id: EMOJI_STAR }))
+  })
+)
+
+(define-read-only (get-user-reaction (entry-id uint) (user principal))
+  (match (map-get? user-reactions { entry-id: entry-id, reactor: user })
+    emoji (ok (some emoji))
+    (ok none)
+  )
+)
+
+;; -- Read-Only: Username / Search -------------------------------------
+
+(define-read-only (get-principal (username (string-ascii 30)))
+  (match (map-get? usernames { username: username })
+    owner (ok owner)
+    ERR_NOT_FOUND
+  )
+)
+
+(define-read-only (get-username (who principal))
+  (match (map-get? username-owners who)
+    name (ok (some name))
+    (ok none)
+  )
+)
+
+(define-read-only (get-user-entry-count (who principal))
+  (ok (default-to u0 (map-get? user-entry-counts who)))
+)
+
+(define-read-only (get-user-entry-at (who principal) (pos uint))
+  (match (map-get? user-entry-index { user: who, pos: pos })
+    entry-id (ok entry-id)
+    ERR_NOT_FOUND
+  )
+)
+
+;; -- Read-Only: Fees --------------------------------------------------
+
+(define-read-only (get-fees-collected)
+  (ok (var-get fees-collected))
+)
+
+;; -- Public: Withdraw Fees --------------------------------------------
+
+(define-public (withdraw-fees)
+  (let
+    ((amount (var-get fees-collected))
+     (caller tx-sender)
+     (reset-fees (var-set fees-collected u0)))
+    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_OWNER)
+    (try! (as-contract (stx-transfer? amount tx-sender caller)))
+    (ok true)
+  )
+)
