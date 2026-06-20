@@ -17,18 +17,25 @@ export function GuestbookWall({
   pageId,
   onReply,
   onEndorse,
+  pageColor: initialColor,
+  pageName: initialName,
+  pageDescription: initialDescription,
 }: {
   refreshKey?: number;
   pageId?: number | null;
   onReply?: (id: number) => void;
   onEndorse?: (id: number) => void;
+  pageColor?: string;
+  pageName?: string;
+  pageDescription?: string;
 }) {
   const { address } = useWallet();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [pageColor, setPageColor] = useState<string | undefined>();
-  const [pageName, setPageName] = useState<string | undefined>();
+  const [pageColor, setPageColor] = useState<string | undefined>(initialColor);
+  const [pageName, setPageName] = useState<string | undefined>(initialName);
+  const [pageDescription, setPageDescription] = useState<string | undefined>(initialDescription);
 
   const loadEntries = useCallback(async () => {
     try {
@@ -38,10 +45,15 @@ export function GuestbookWall({
 
       if (pageId) {
         const p = await getPage(pageId, sender);
-        if (p) { setPageColor(p.color); setPageName(p.name); }
+        if (p) {
+          setPageColor(p.color);
+          setPageName(p.name);
+          setPageDescription(p.description);
+        }
       } else {
         setPageColor(undefined);
         setPageName(undefined);
+        setPageDescription(undefined);
       }
 
       const count = await getEntryCount(sender);

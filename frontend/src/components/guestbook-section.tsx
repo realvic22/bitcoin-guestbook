@@ -1,14 +1,30 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { WriteForm } from "@/components/guestbook/WriteForm";
 import { GuestbookWall } from "@/components/guestbook-wall";
 import { PageSelector } from "@/components/guestbook/PageSelector";
+import { getPage, type PageData } from "@/lib/contracts";
+import { useWallet } from "@/components/wallet-provider";
+
+type PageMeta = (PageData & { id: number }) | null;
 
 export function GuestbookSection({ appMode = false }: { appMode?: boolean }) {
+  const { address } = useWallet();
   const [selectedPage, setSelectedPage] = useState<number | null>(null);
+  const [selectedPageMeta, setSelectedPageMeta] = useState<PageMeta>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [replyTo, setReplyTo] = useState<{ id: number; preview: string } | null>(null);
+
+  useEffect(() => {
+    if (!selectedPage) { setSelectedPageMeta(null); return; }
+    const sender = address || "SP2X9XZZHGXMCV14WZ6FCNPH6JMR0NMASQGA3GAB1";
+    let cancelled = false;
+    getPage(selectedPage, sender).then((p) => {
+      if (!cancelled && p) setSelectedPageMeta({ ...p, id: selectedPage });
+    });
+    return () => { cancelled = true; };
+  }, [selectedPage, address]);
 
   const handleEntryWritten = useCallback(() => {
     setTimeout(() => setRefreshKey((k) => k + 1), 4000);
@@ -16,14 +32,12 @@ export function GuestbookSection({ appMode = false }: { appMode?: boolean }) {
 
   const handleReply = useCallback((entryId: number) => {
     setReplyTo({ id: entryId, preview: "Loading..." });
-    // Fetch entry preview for context
     import("@/lib/contracts").then(({ getEntry }) => {
       const sender = "SP2X9XZZHGXMCV14WZ6FCNPH6JMR0NMASQGA3GAB1";
       getEntry(entryId, sender).then((entry) => {
         if (entry) setReplyTo({ id: entryId, preview: entry.message });
       });
     });
-    // Scroll to write form
     document.getElementById("write-form")?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
@@ -74,6 +88,9 @@ export function GuestbookSection({ appMode = false }: { appMode?: boolean }) {
             pageId={selectedPage}
             onReply={handleReply}
             onEndorse={handleEndorse}
+            pageColor={selectedPageMeta?.color}
+            pageName={selectedPageMeta?.name}
+            pageDescription={selectedPageMeta?.description}
           />
         </div>
       </div>
