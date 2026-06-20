@@ -23,7 +23,6 @@ const icons = [Moon, Sprout, Archive, Heart, Feather, Landmark, Hourglass, Spark
 export function PageSelector({ selected, onSelect }: { selected: number | null; onSelect: (id: number | null) => void }) {
   const { address } = useWallet();
   const [pages, setPages] = useState<PageItem[]>(FALLBACK);
-  const selectedPage = useMemo(() => pages.find((p) => p.id === selected), [pages, selected]);
 
   useEffect(() => {
     const sender = address || "SP2X9XZZHGXMCV14WZ6FCNPH6JMR0NMASQGA3GAB1";

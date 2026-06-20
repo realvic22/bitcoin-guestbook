@@ -14,9 +14,25 @@ const MAX_ENTRIES = 50;
 
 const roomIcons = [Moon, Sprout, Archive, Heart, Feather, Landmark, Hourglass, Sparkles];
 
-function roomIconFor(id: number | null) {
-  if (id === null) return Layers;
-  return roomIcons[(id - 1) % roomIcons.length];
+function renderRoomIcon(id: number | null, size: number, color: string) {
+  const Icon = id === null ? Layers : roomIcons[(id - 1) % roomIcons.length];
+  return <Icon size={size} color={color} />;
+}
+
+const emptyStateByRoom: Record<string, { heading: string; text: string }> = {
+  "Dream Wall": { heading: "No dreams shared yet", text: "Be the first to plant a dream on the chain." },
+  "Thank You Wall": { heading: "No gratitude anchored yet", text: "Leave a thank you that cannot be deleted." },
+  "Memory Wall": { heading: "No memories sealed yet", text: "Be the first to save a moment here." },
+  "Love Notes": { heading: "No love notes written yet", text: "Write one that will still be here decades from now." },
+  "Forgiveness Wall": { heading: "Nothing let go yet", text: "Leave it here and let the chain keep the receipt." },
+  "Legacy Wall": { heading: "No legacy written yet", text: "Be the first to leave something behind." },
+  "Predictions": { heading: "No predictions made", text: "Seal a version of the future and see if it comes true." },
+  "General": { heading: "This room is quiet", text: "Be the first to give it a voice." },
+};
+
+function emptyStateFor(pageName: string | undefined): { heading: string; text: string } {
+  if (pageName && emptyStateByRoom[pageName]) return emptyStateByRoom[pageName];
+  return { heading: "This room is quiet", text: "Be the first to give it a voice." };
 }
 
 export function GuestbookWall({
@@ -94,6 +110,8 @@ export function GuestbookWall({
 
   const handleRefresh = useCallback(() => { loadEntries(); }, [loadEntries]);
 
+  const empty = emptyStateFor(pageName);
+
   return (
     <div className="min-w-0">
       <div
@@ -105,17 +123,12 @@ export function GuestbookWall({
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2.5 mb-2">
-                {(() => {
-                  const Icon = roomIconFor(pageId ?? null);
-                  return (
-                    <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-                      style={{ background: pageColor ? `${pageColor}18` : "rgba(32,25,35,0.06)" }}
-                    >
-                      <Icon size={15} color={pageColor || "var(--text-secondary)"} />
-                    </div>
-                  );
-                })()}
+                <div
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                  style={{ background: pageColor ? `${pageColor}18` : "rgba(32,25,35,0.06)" }}
+                >
+                  {renderRoomIcon(pageId ?? null, 15, pageColor || "var(--text-secondary)")}
+                </div>
                 <h3 className="text-xl font-black leading-tight" style={{ color: "var(--ink)", letterSpacing: 0 }}>
                   {pageName || "All Rooms"}
                 </h3>
@@ -158,10 +171,17 @@ export function GuestbookWall({
       )}
 
       {!loading && !error && entries.length === 0 && (
-        <div className="rounded-lg border bg-[rgba(255,248,236,0.58)] p-12 text-center" style={{ borderColor: "rgba(32,25,35,0.08)" }}>
-          <p className="text-xl font-black mb-2" style={{ color: "var(--ink)" }}>This room is quiet</p>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            {pageId ? "Be the first to give it a voice." : "Connect your wallet and write the first permanent message."}
+        <div
+          className="relative overflow-hidden rounded-lg border p-12 text-center"
+          style={{ borderColor: pageColor ? `${pageColor}33` : "rgba(32,25,35,0.08)" }}
+        >
+          <div className="absolute top-0 left-0 right-0 h-1.5" style={{ background: pageColor || "var(--text-muted)" }} />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: pageColor ? `${pageColor}18` : "rgba(32,25,35,0.06)" }}>
+            {renderRoomIcon(pageId ?? null, 22, pageColor || "var(--text-muted)")}
+          </div>
+          <p className="text-xl font-black mb-2" style={{ color: "var(--ink)" }}>{empty.heading}</p>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            {pageId ? empty.text : "Connect your wallet and write the first permanent message."}
           </p>
         </div>
       )}

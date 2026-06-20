@@ -23,7 +23,10 @@ export function GuestbookSection({
   const [replyTo, setReplyTo] = useState<{ id: number; preview: string } | null>(null);
 
   useEffect(() => {
-    if (!selectedPage) { setSelectedPageMeta(null); return; }
+    if (!selectedPage) {
+      queueMicrotask(() => setSelectedPageMeta(null));
+      return;
+    }
     const sender = address || "SP2X9XZZHGXMCV14WZ6FCNPH6JMR0NMASQGA3GAB1";
     let cancelled = false;
     getPage(selectedPage, sender).then((p) => {
