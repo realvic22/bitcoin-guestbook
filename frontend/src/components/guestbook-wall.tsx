@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { Archive, Feather, Heart, Hourglass, Landmark, Layers, Moon, RefreshCw, Sparkles, Sprout } from "lucide-react";
 import { getEntryCount, getEntry, getPage } from "@/lib/contracts";
 import { EntryCard } from "@/components/guestbook/EntryCard";
 import { useWallet } from "./wallet-provider";
@@ -11,6 +11,13 @@ interface Entry extends EntryFull { id: number; }
 
 const FALLBACK_SENDER = "SP2X9XZZHGXMCV14WZ6FCNPH6JMR0NMASQGA3GAB1";
 const MAX_ENTRIES = 50;
+
+const roomIcons = [Moon, Sprout, Archive, Heart, Feather, Landmark, Hourglass, Sparkles];
+
+function roomIconFor(id: number | null) {
+  if (id === null) return Layers;
+  return roomIcons[(id - 1) % roomIcons.length];
+}
 
 export function GuestbookWall({
   refreshKey = 0,
@@ -89,18 +96,52 @@ export function GuestbookWall({
 
   return (
     <div className="min-w-0">
-      <div className="flex items-center justify-between mb-6 rounded-lg border bg-[rgba(255,248,236,0.58)] p-4" style={{ borderColor: pageColor ? `${pageColor}33` : "rgba(32,25,35,0.08)" }}>
-        <div>
-          <h3 className="text-lg font-black" style={{ color: "var(--ink)", letterSpacing: 0 }}>
-            {pageName ? pageName : "All Rooms"}
-          </h3>
-          <p className="mt-1 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
-            {pageName ? "Filtered to one emotional room." : "Latest messages across every room."}
-          </p>
+      <div
+        className="relative mb-6 overflow-hidden rounded-lg border"
+        style={{ borderColor: pageColor ? `${pageColor}55` : "rgba(32,25,35,0.08)" }}
+      >
+        <div className="h-1.5" style={{ background: pageColor || "var(--text-muted)" }} />
+        <div className="p-4 sm:p-5" style={{ background: "rgba(255,248,236,0.58)" }}>
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2.5 mb-2">
+                {(() => {
+                  const Icon = roomIconFor(pageId ?? null);
+                  return (
+                    <div
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                      style={{ background: pageColor ? `${pageColor}18` : "rgba(32,25,35,0.06)" }}
+                    >
+                      <Icon size={15} color={pageColor || "var(--text-secondary)"} />
+                    </div>
+                  );
+                })()}
+                <h3 className="text-xl font-black leading-tight" style={{ color: "var(--ink)", letterSpacing: 0 }}>
+                  {pageName || "All Rooms"}
+                </h3>
+              </div>
+              <p className="text-xs font-semibold leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                {pageName
+                  ? pageDescription || "Filtered to one emotional room."
+                  : "Latest messages across every room."}
+              </p>
+              {entries.length > 0 && (
+                <span
+                  className="mt-2.5 inline-block rounded-full px-2.5 py-1 text-xs font-black"
+                  style={{
+                    background: pageColor ? `${pageColor}14` : "rgba(32,25,35,0.06)",
+                    color: pageColor || "var(--text-muted)",
+                  }}
+                >
+                  {entries.length} {entries.length === 1 ? "entry" : "entries"}
+                </span>
+              )}
+            </div>
+            <button onClick={handleRefresh} disabled={loading} className="neu-icon-circle w-9 h-9 shrink-0 mt-0.5 disabled:opacity-50" aria-label="Refresh">
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} style={{ color: "var(--text-secondary)" }} />
+            </button>
+          </div>
         </div>
-        <button onClick={handleRefresh} disabled={loading} className="neu-icon-circle w-9 h-9 disabled:opacity-50" aria-label="Refresh">
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} style={{ color: "var(--text-secondary)" }} />
-        </button>
       </div>
 
       {loading && (
