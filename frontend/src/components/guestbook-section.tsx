@@ -9,7 +9,13 @@ import { useWallet } from "@/components/wallet-provider";
 
 type PageMeta = (PageData & { id: number }) | null;
 
-export function GuestbookSection({ appMode = false }: { appMode?: boolean }) {
+export function GuestbookSection({
+  appMode = false,
+  onRoomChange,
+}: {
+  appMode?: boolean;
+  onRoomChange?: (meta: PageMeta) => void;
+}) {
   const { address } = useWallet();
   const [selectedPage, setSelectedPage] = useState<number | null>(null);
   const [selectedPageMeta, setSelectedPageMeta] = useState<PageMeta>(null);
@@ -25,6 +31,10 @@ export function GuestbookSection({ appMode = false }: { appMode?: boolean }) {
     });
     return () => { cancelled = true; };
   }, [selectedPage, address]);
+
+  useEffect(() => {
+    onRoomChange?.(selectedPageMeta);
+  }, [selectedPageMeta, onRoomChange]);
 
   const handleEntryWritten = useCallback(() => {
     setTimeout(() => setRefreshKey((k) => k + 1), 4000);
