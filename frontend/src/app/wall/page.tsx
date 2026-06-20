@@ -58,15 +58,18 @@ export default function WallPage() {
                   Guestbook Wall
                 </div>
                 {currentRoom && (
-                  <div className="hidden sm:flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-black" style={{ background: `${currentRoom.color}18`, color: currentRoom.color }}>
+                  <div
+                    className="hidden sm:flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-black transition-all duration-300"
+                    style={{ background: `${currentRoom.color}18`, color: currentRoom.color }}
+                  >
                     <span className="h-1.5 w-1.5 rounded-full" style={{ background: currentRoom.color }} />
                     {currentRoom.name}
                   </div>
                 )}
               </div>
-              <div className="truncate text-xs font-bold" style={{ color: currentRoom ? currentRoom.color : "var(--text-muted)" }}>
-                {currentRoom ? currentRoom.description : "Rooms for permanent messages"}
-              </div>
+          <div className="truncate text-xs font-bold transition-colors duration-300" style={{ color: currentRoom ? currentRoom.color : "var(--text-muted)" }}>
+            {currentRoom ? currentRoom.description : "Rooms for permanent messages"}
+          </div>
             </Link>
           </div>
 
@@ -84,7 +87,7 @@ export default function WallPage() {
         <div className="grid gap-5 lg:grid-cols-[1fr_360px] lg:items-end">
           <div>
             <span
-              className="text-xs font-black uppercase tracking-widest"
+              className="text-xs font-black uppercase tracking-widest transition-colors duration-300"
               style={{ color: currentRoom?.color || "var(--rose)" }}
             >
               {currentRoom ? `The ${currentRoom.name}` : "The live wall"}
@@ -108,8 +111,8 @@ export default function WallPage() {
           {guide.map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.title} className="rounded-lg border bg-[rgba(255,248,236,0.66)] p-3 shadow-sm sm:p-4" style={{ borderColor: currentRoom ? `${currentRoom.color}33` : "rgba(32,25,35,0.08)" }}>
-                <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full sm:mb-3 sm:h-9 sm:w-9" style={{ background: currentRoom ? `${currentRoom.color}18` : "rgba(23,111,117,0.11)" }}>
+              <div key={item.title} className="rounded-lg border bg-[rgba(255,248,236,0.66)] p-3 shadow-sm sm:p-4 transition-colors duration-300" style={{ borderColor: currentRoom ? `${currentRoom.color}33` : "rgba(32,25,35,0.08)" }}>
+                <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full sm:mb-3 sm:h-9 sm:w-9 transition-colors duration-300" style={{ background: currentRoom ? `${currentRoom.color}18` : "rgba(23,111,117,0.11)" }}>
                   <Icon size={17} color={currentRoom?.color || "var(--teal)"} />
                 </div>
                 <h2 className="text-sm font-black" style={{ color: "var(--ink)" }}>{item.title}</h2>

@@ -115,16 +115,19 @@ export function GuestbookWall({
   return (
     <div className="min-w-0">
       <div
-        className="relative mb-6 overflow-hidden rounded-lg border"
+        className="relative mb-6 overflow-hidden rounded-lg border transition-colors duration-300"
         style={{ borderColor: pageColor ? `${pageColor}55` : "rgba(32,25,35,0.08)" }}
       >
-        <div className="h-1.5" style={{ background: pageColor || "var(--text-muted)" }} />
+        <div
+          className="h-1.5 transition-colors duration-300"
+          style={{ background: pageColor || "var(--text-muted)" }}
+        />
         <div className="p-4 sm:p-5" style={{ background: "rgba(255,248,236,0.58)" }}>
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2.5 mb-2">
                 <div
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-300"
                   style={{ background: pageColor ? `${pageColor}18` : "rgba(32,25,35,0.06)" }}
                 >
                   {renderRoomIcon(pageId ?? null, 15, pageColor || "var(--text-secondary)")}
@@ -140,7 +143,7 @@ export function GuestbookWall({
               </p>
               {entries.length > 0 && (
                 <span
-                  className="mt-2.5 inline-block rounded-full px-2.5 py-1 text-xs font-black"
+                  className="mt-2.5 inline-block rounded-full px-2.5 py-1 text-xs font-black transition-colors duration-300"
                   style={{
                     background: pageColor ? `${pageColor}14` : "rgba(32,25,35,0.06)",
                     color: pageColor || "var(--text-muted)",
@@ -172,11 +175,11 @@ export function GuestbookWall({
 
       {!loading && !error && entries.length === 0 && (
         <div
-          className="relative overflow-hidden rounded-lg border p-12 text-center"
+          className="relative overflow-hidden rounded-lg border p-12 text-center transition-colors duration-300"
           style={{ borderColor: pageColor ? `${pageColor}33` : "rgba(32,25,35,0.08)" }}
         >
-          <div className="absolute top-0 left-0 right-0 h-1.5" style={{ background: pageColor || "var(--text-muted)" }} />
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full" style={{ background: pageColor ? `${pageColor}18` : "rgba(32,25,35,0.06)" }}>
+          <div className="absolute top-0 left-0 right-0 h-1.5 transition-colors duration-300" style={{ background: pageColor || "var(--text-muted)" }} />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full transition-colors duration-300" style={{ background: pageColor ? `${pageColor}18` : "rgba(32,25,35,0.06)" }}>
             {renderRoomIcon(pageId ?? null, 22, pageColor || "var(--text-muted)")}
           </div>
           <p className="text-xl font-black mb-2" style={{ color: "var(--ink)" }}>{empty.heading}</p>
@@ -188,16 +191,17 @@ export function GuestbookWall({
 
       {!loading && !error && entries.length > 0 && (
         <div className="space-y-4">
-          {entries.map((entry) => (
-            <EntryCard
-              key={entry.id}
-              entry={entry}
-              pageColor={pageColor}
-              pageName={pageName}
-              onReply={onReply}
-              onEndorse={onEndorse}
-              onRefresh={handleRefresh}
-            />
+          {entries.map((entry, index) => (
+            <div key={entry.id} className="animate-entry-in" style={{ animationDelay: `${index * 0.05}s` }}>
+              <EntryCard
+                entry={entry}
+                pageColor={pageColor}
+                pageName={pageName}
+                onReply={onReply}
+                onEndorse={onEndorse}
+                onRefresh={handleRefresh}
+              />
+            </div>
           ))}
         </div>
       )}
