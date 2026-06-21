@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { request } from "@stacks/connect";
 import { Cl } from "@stacks/transactions";
-import { Feather, LockKeyhole, MessageCircle, Stamp } from "lucide-react";
+import { AlertTriangle, Feather, LockKeyhole, MessageCircle, Stamp } from "lucide-react";
 import { CONTRACT_ADDRESS, CONTRACT_NAME, ENTRY_FEE } from "@/lib/stacks";
 import { getPageCount, getPage, type PageData } from "@/lib/contracts";
 import { useWallet } from "@/components/wallet-provider";
@@ -199,6 +199,12 @@ export function WriteForm({ onEntryWritten, defaultPageId, replyTo }: WriteFormP
           {sending ? "Sending..." : replyTo ? "Reply" : mode === "capsule" ? "Seal Capsule" : "Etch on Bitcoin"}
         </button>
       </div>
+
+      {!txId && (
+        <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold" style={{ color: "var(--gold)" }}>
+          <AlertTriangle size={12} /> Once signed, this message cannot be edited or deleted.
+        </p>
+      )}
 
       {txId && <p className="mt-3 text-xs" style={{ color: "var(--neu-accent)" }}>Broadcast! Entry will appear after confirmation.</p>}
       {error && <p className="mt-3 text-xs text-red-500">{error}</p>}
