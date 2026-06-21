@@ -23,10 +23,8 @@ export function EntryCard({ entry, pageColor, pageName, onReply, onEndorse, onRe
   const [showMeta, setShowMeta] = useState(false);
 
   useEffect(() => {
-    if (address) {
-      const sender = address || "SP2X9XZZHGXMCV14WZ6FCNPH6JMR0NMASQGA3GAB1";
-      getUsername(entry.author, sender).then(setUsername);
-    }
+    const sender = address || "SP2X9XZZHGXMCV14WZ6FCNPH6JMR0NMASQGA3GAB1";
+    getUsername(entry.author, sender).then(setUsername);
   }, [address, entry.author]);
 
   function truncate(addr: string) { return `${addr.slice(0, 6)}...${addr.slice(-4)}`; }
