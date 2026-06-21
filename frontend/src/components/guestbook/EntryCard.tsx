@@ -114,6 +114,44 @@ export function EntryCard({ entry, pageColor, pageName, onReply, onEndorse, onRe
         </div>
         <span>Block #{entry.block}</span>
       </div>
+
+      {/* Expandable metadata drawer */}
+      {showMeta && (
+        <div className="mt-3 space-y-1.5 rounded-lg border p-3 text-xs" style={{ borderColor: "rgba(32,25,35,0.06)", background: "rgba(255,248,236,0.42)" }}>
+          <div className="flex justify-between gap-4">
+            <span style={{ color: "var(--text-muted)" }}>Entry ID</span>
+            <span className="font-mono font-bold" style={{ color: "var(--ink)" }}>#{entry.id}</span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span style={{ color: "var(--text-muted)" }}>Author</span>
+            <span className="font-mono truncate" style={{ color: "var(--ink)" }}>{entry.author}</span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span style={{ color: "var(--text-muted)" }}>Block</span>
+            <span className="font-mono font-bold" style={{ color: "var(--ink)" }}>#{entry.block}</span>
+          </div>
+          {entry.pageId !== null && (
+            <div className="flex justify-between gap-4">
+              <span style={{ color: "var(--text-muted)" }}>Room</span>
+              <span className="font-bold" style={{ color: pageColor || "var(--ink)" }}>
+                #{entry.pageId}{pageName ? ` · ${pageName}` : ""}
+              </span>
+            </div>
+          )}
+          {entry.parentId !== null && entry.parentId > 0 && (
+            <div className="flex justify-between gap-4">
+              <span style={{ color: "var(--text-muted)" }}>Reply to</span>
+              <span className="font-mono font-bold" style={{ color: "var(--teal)" }}>#{entry.parentId}</span>
+            </div>
+          )}
+          {isSealed && (
+            <div className="flex justify-between gap-4">
+              <span style={{ color: "var(--text-muted)" }}>Reveal block</span>
+              <span className="font-mono font-bold" style={{ color: "var(--gold)" }}>#{entry.revealBlock}</span>
+            </div>
+          )}
+        </div>
+      )}
     </article>
   );
 }
