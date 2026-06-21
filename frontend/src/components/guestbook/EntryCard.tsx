@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MessageCircle, Heart, Clock, Reply, Link2, LockKeyhole } from "lucide-react";
+import { Bitcoin, MessageCircle, Heart, Clock, Reply, Link2, LockKeyhole } from "lucide-react";
 import { ReactionBar } from "./ReactionBar";
 import type { EntryFull } from "@/lib/contracts";
 import { getUsername } from "@/lib/contracts";
@@ -112,7 +112,9 @@ export function EntryCard({ entry, pageColor, pageName, onReply, onEndorse, onRe
           </span>
           <span className="font-mono truncate">{username ? `@${username}` : truncate(entry.author)}</span>
         </div>
-        <span>Block #{entry.block}</span>
+        <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]" style={{ background: "rgba(201,142,47,0.12)", color: "var(--gold)" }}>
+          <Bitcoin size={10} /> Block #{entry.block}
+        </span>
       </div>
 
       {/* Expandable metadata drawer */}
