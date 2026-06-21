@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bitcoin, MessageCircle, Heart, Clock, Reply, Link2, LockKeyhole } from "lucide-react";
+import { Bitcoin, ExternalLink, MessageCircle, Heart, Clock, Reply, Link2, LockKeyhole } from "lucide-react";
 import { ReactionBar } from "./ReactionBar";
 import type { EntryFull } from "@/lib/contracts";
 import { getUsername } from "@/lib/contracts";
+import { CONTRACT_ADDRESS, CONTRACT_NAME } from "@/lib/stacks";
 import { useWallet } from "@/components/wallet-provider";
 
 interface EntryCardProps {
@@ -152,6 +153,15 @@ export function EntryCard({ entry, pageColor, pageName, onReply, onEndorse, onRe
               <span className="font-mono font-bold" style={{ color: "var(--gold)" }}>#{entry.revealBlock}</span>
             </div>
           )}
+          <a
+            href={`https://explorer.stacks.co/contract/${CONTRACT_ADDRESS}.${CONTRACT_NAME}?chain=${process.env.NEXT_PUBLIC_NETWORK || "testnet"}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 pt-2 mt-1 border-t text-xs font-bold transition-colors"
+            style={{ borderColor: "rgba(32,25,35,0.06)", color: "var(--text-muted)" }}
+          >
+            <ExternalLink size={12} /> View contract on Stacks Explorer
+          </a>
         </div>
       )}
     </article>
