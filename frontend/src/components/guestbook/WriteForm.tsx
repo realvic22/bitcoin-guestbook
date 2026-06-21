@@ -31,6 +31,10 @@ export function WriteForm({ onEntryWritten, defaultPageId, replyTo }: WriteFormP
   const MAX_CHARS = 200;
 
   useEffect(() => {
+    setPageId(defaultPageId ?? null);
+  }, [defaultPageId]);
+
+  useEffect(() => {
     const sender = address || "SP2X9XZZHGXMCV14WZ6FCNPH6JMR0NMASQGA3GAB1";
     getPageCount(sender).then(async (count) => {
       const items: (PageData & { id: number })[] = [];
