@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { request } from "@stacks/connect";
 import { Cl } from "@stacks/transactions";
-import { Clock3, Feather, LockKeyhole, MessageCircle, Stamp } from "lucide-react";
+import { Feather, LockKeyhole, MessageCircle, Stamp } from "lucide-react";
 import { CONTRACT_ADDRESS, CONTRACT_NAME, ENTRY_FEE } from "@/lib/stacks";
 import { getPageCount, getPage, type PageData } from "@/lib/contracts";
 import { useWallet } from "@/components/wallet-provider";
@@ -147,15 +147,6 @@ export function WriteForm({ onEntryWritten, defaultPageId, replyTo }: WriteFormP
         >
           {pageId ? pages.find(p => p.id === pageId)?.name || `Wall #${pageId}` : "Choose Wall"}
         </button>
-
-        {!replyTo && (
-          <button onClick={() => setMode(mode === "capsule" ? "new" : "capsule")}
-            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black transition-all"
-            style={{ background: mode === "capsule" ? "rgba(201,142,47,0.16)" : "rgba(255,248,236,0.72)", color: mode === "capsule" ? "var(--gold)" : "var(--text-secondary)", boxShadow: mode === "capsule" ? "var(--neu-inset-sm)" : "none" }}
-          >
-            <Clock3 size={13} /> {mode === "capsule" ? "Sealed" : "Time Capsule"}
-          </button>
-        )}
       </div>
 
       {/* Page picker dropdown */}
