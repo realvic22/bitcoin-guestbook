@@ -103,7 +103,15 @@ export function EntryCard({ entry, pageColor, pageName, onReply, onEndorse, onRe
 
       {/* Author + block metadata */}
       <div className="flex flex-wrap justify-between items-center gap-2 border-t pt-3 text-xs font-bold" style={{ color: "var(--text-muted)", borderColor: "rgba(32,25,35,0.08)" }}>
-        <span className="font-mono">{username ?? truncate(entry.author)}</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <span
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black"
+            style={{ background: pageColor ? `${pageColor}18` : "rgba(32,25,35,0.06)", color: pageColor || "var(--text-secondary)" }}
+          >
+            {(username ?? entry.author)[0]?.toUpperCase()}
+          </span>
+          <span className="font-mono truncate">{username ? `@${username}` : truncate(entry.author)}</span>
+        </div>
         <span>Block #{entry.block}</span>
       </div>
     </article>
