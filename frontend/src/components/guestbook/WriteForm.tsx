@@ -107,6 +107,41 @@ export function WriteForm({ onEntryWritten, defaultPageId, replyTo }: WriteFormP
         </div>
       )}
 
+      {/* Room selection — choose where to write first */}
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        {defaultPageId ? (
+          <span
+            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black"
+            style={{ background: pageId ? (pages.find(p => p.id === pageId)?.color + "20" || "rgba(255,248,236,0.72)") : "rgba(255,248,236,0.72)", color: pageId ? (pages.find(p => p.id === pageId)?.color || "var(--text-secondary)") : "var(--text-secondary)" }}
+          >
+            <LockKeyhole size={12} /> {pageId ? pages.find(p => p.id === pageId)?.name || `Wall #${pageId}` : "Locked"}
+          </span>
+        ) : (
+          <button onClick={() => setShowPagePicker(!showPagePicker)}
+            className="rounded-full px-3 py-1.5 text-xs font-black transition-all"
+            style={{ background: pageId ? (pages.find(p => p.id === pageId)?.color + "20" || "rgba(255,248,236,0.72)") : "rgba(255,248,236,0.72)", color: pageId ? (pages.find(p => p.id === pageId)?.color || "var(--text-secondary)") : "var(--text-secondary)", boxShadow: pageId ? "var(--neu-inset-sm)" : "none" }}
+          >
+            {pageId ? pages.find(p => p.id === pageId)?.name || `Wall #${pageId}` : "Choose Wall"}
+          </button>
+        )}
+      </div>
+
+      {/* Page picker dropdown — only in All Rooms mode */}
+      {showPagePicker && !defaultPageId && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          <button onClick={() => { setPageId(null); setShowPagePicker(false); }}
+            className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(255,248,236,0.72)", color: "var(--text-secondary)" }}
+          >None</button>
+          {pages.map((p) => (
+            <button key={p.id} onClick={() => { setPageId(p.id); setShowPagePicker(false); }}
+              className="px-2.5 py-1 rounded-full text-xs font-bold transition-all"
+              style={{ background: pageId === p.id ? p.color : "var(--neu-bg)", color: pageId === p.id ? "#fff" : p.color, borderColor: p.color, borderWidth: 1, borderStyle: "solid" }}
+            >{p.name}</button>
+          ))}
+        </div>
+      )}
+
+      {/* Message type — choose how to write */}
       <div className="mb-3 grid grid-cols-3 gap-2">
         {[
           { value: "new" as WriteMode, label: "Note", icon: Feather },
@@ -142,40 +177,6 @@ export function WriteForm({ onEntryWritten, defaultPageId, replyTo }: WriteFormP
         disabled={sending}
         className="neu-input w-full resize-none text-base leading-relaxed disabled:opacity-50"
       />
-
-      {/* Options row */}
-      <div className="flex flex-wrap items-center gap-2 mt-3">
-        {defaultPageId ? (
-          <span
-            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black"
-            style={{ background: pageId ? (pages.find(p => p.id === pageId)?.color + "20" || "rgba(255,248,236,0.72)") : "rgba(255,248,236,0.72)", color: pageId ? (pages.find(p => p.id === pageId)?.color || "var(--text-secondary)") : "var(--text-secondary)" }}
-          >
-            <LockKeyhole size={12} /> {pageId ? pages.find(p => p.id === pageId)?.name || `Wall #${pageId}` : "Locked"}
-          </span>
-        ) : (
-          <button onClick={() => setShowPagePicker(!showPagePicker)}
-            className="rounded-full px-3 py-1.5 text-xs font-black transition-all"
-            style={{ background: pageId ? (pages.find(p => p.id === pageId)?.color + "20" || "rgba(255,248,236,0.72)") : "rgba(255,248,236,0.72)", color: pageId ? (pages.find(p => p.id === pageId)?.color || "var(--text-secondary)") : "var(--text-secondary)", boxShadow: pageId ? "var(--neu-inset-sm)" : "none" }}
-          >
-            {pageId ? pages.find(p => p.id === pageId)?.name || `Wall #${pageId}` : "Choose Wall"}
-          </button>
-        )}
-      </div>
-
-      {/* Page picker dropdown — only in All Rooms mode */}
-      {showPagePicker && !defaultPageId && (
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          <button onClick={() => { setPageId(null); setShowPagePicker(false); }}
-            className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(255,248,236,0.72)", color: "var(--text-secondary)" }}
-          >None</button>
-          {pages.map((p) => (
-            <button key={p.id} onClick={() => { setPageId(p.id); setShowPagePicker(false); }}
-              className="px-2.5 py-1 rounded-full text-xs font-bold transition-all"
-              style={{ background: pageId === p.id ? p.color : "var(--neu-bg)", color: pageId === p.id ? "#fff" : p.color, borderColor: p.color, borderWidth: 1, borderStyle: "solid" }}
-            >{p.name}</button>
-          ))}
-        </div>
-      )}
 
       {/* Capsule reveal block input */}
       {mode === "capsule" && (
